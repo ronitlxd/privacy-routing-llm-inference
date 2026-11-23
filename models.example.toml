@@ -1,0 +1,74 @@
+# Where each model runs and how to reach it.
+# Copy to models.toml (git-ignored) and edit, or run `python jlr_setup.py` -> "Models file".
+# Without models.toml the app uses the .env settings (JLR_OLLAMA_URL, JLR_V2_LARGER_*), as before.
+#
+# Two parts:
+#   [endpoints.<name>]  a model server
+#   [roles.<role>]      which model does each job: router, local, larger
+#
+# provider  ollama     Ollama's own API (/api/generate)
+#           openai     any OpenAI-compatible server: vLLM, TGI, LM Studio, llama.cpp server,
+#                      Ollama's /v1, OpenAI, Groq ...  (url ends in /v1)
+#           anthropic  Anthropic Messages API
+#
+# trust     on_vehicle  this device, or a private server you control. May see UNMASKED private data.
+#           external    anything else (hosted APIs). Gets MASKED text only.
+#
+# Privacy rules (the server refuses to start if one is broken):
+#   - [roles.router] and [roles.local] read the driver's unmasked request: their endpoint must be on_vehicle;
+#   - on_vehicle = a loopback address, or an HTTPS server that is not a public model API
+#     (api.openai.com, api.anthropic.com, api.groq.com ... are refused as on_vehicle);
+#   - another machine is only reached over HTTPS (or through an SSH tunnel to 127.0.0.1);
+#   - never write an API key here: api_key_env names the environment variable (or .env entry) that holds it.
+
+# ------------------------------------------------------------------ endpoints
+[endpoints.vehicle]
+provider = "ollama"
+url      = "http://127.0.0.1:11434"
+trust    = "on_vehicle"
+# ca_file = "certs/private-ca.pem"   # HTTPS with a private certificate authority (path relative to this file)
+# api_key_env = "OLLAMA_PROXY_KEY"   # only if a proxy in front of Ollama wants a bearer token
+
+# Example: the client's own model server (vLLM, TGI, LM Studio ...), reached over HTTPS.
+# [endpoints.client_server]
+# provider    = "openai"
+# url         = "https://models.client.internal/v1"
+# trust       = "on_vehicle"
+# api_key_env = "CLIENT_MODELS_KEY"
+
+# Example: a hosted larger model.
+# [endpoints.cloud]
+# provider    = "anthropic"
+# url         = "https://api.anthropic.com/v1"
+# trust       = "external"
+# api_key_env = "ANTHROPIC_API_KEY"
+
+# ------------------------------------------------------------------ roles
+# Optional keys for every role: timeout (s), threads, context (tokens), max_output_tokens,
+# temperature (default 0), seed (default 42), warmup (default true, Ollama only).
+# gpu_layers is for Ollama only: -1 = as many layers as fit on the GPU, 0 = CPU only.
+
+# There are no default models: the names below are placeholders for the models you run.
+# ./install.sh writes this file from what your server or cloud service lists.
+
+[roles.router]               # reads the UNMASKED request, picks the route
+endpoint   = "vehicle"
+model      = "your-small-model"
+timeout    = 45
+gpu_layers = -1
+# The routing rules (jlr/routing_profile.json) were tested with qwen3:4b-instruct-2507-q4_K_M.
+# With any other router model the server starts only with untuned_ok = true (the installer sets it, with a
+# warning): test requests with private details before relying on it.
+untuned_ok = true
+
+[roles.local]                # answers simple and sensitive requests, UNMASKED
+endpoint   = "vehicle"
+model      = "your-small-model"
+timeout    = 90
+gpu_layers = -1
+
+[roles.larger]               # complex requests, MASKED text only
+endpoint   = "vehicle"       # or "cloud" / any endpoint, on_vehicle or external
+model      = "your-large-model"
+timeout    = 150
+gpu_layers = 0               # 0 = CPU; -1 = GPU when both models fit in its memory (the installer decides from their sizes)

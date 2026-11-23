@@ -1,0 +1,291 @@
+{
+  "version": "privacy-policy-v3",
+  "status": "prototype_assumption",
+  "tiers": {
+    "P0": {
+      "name": "Public",
+      "meaning": "No personal data."
+    },
+    "P1": {
+      "name": "Personal",
+      "meaning": "Identifies the driver's life with low harm if exposed in masked form (contacts, saved places, preferences, session references)."
+    },
+    "P2": {
+      "name": "Sensitive",
+      "meaning": "Harmful if exposed: health, finances, legal matters, direct contact details."
+    },
+    "P3": {
+      "name": "Restricted",
+      "meaning": "Must never leave the device in any form: credentials, payment cards, government IDs, bank account numbers."
+    }
+  },
+  "reference_types": {
+    "person": {
+      "category": "identity",
+      "tier": "P1",
+      "maskable": true
+    },
+    "location": {
+      "category": "location",
+      "tier": "P1",
+      "maskable": true
+    },
+    "preference": {
+      "category": "preference",
+      "tier": "P1",
+      "maskable": true
+    },
+    "session_reference": {
+      "category": "session",
+      "tier": "P1",
+      "maskable": true
+    },
+    "personal_detail": {
+      "category": "personal_detail",
+      "tier": "P1",
+      "maskable": true
+    },
+    "other_private": {
+      "category": "other_private",
+      "tier": "P1",
+      "maskable": true
+    },
+    "contact_detail": {
+      "category": "contact_detail",
+      "tier": "P2",
+      "maskable": true
+    }
+  },
+  "context_sources": {
+    "private_db": {
+      "category": "saved_data",
+      "tier": "P1",
+      "maskable": true
+    },
+    "session": {
+      "category": "session",
+      "tier": "P1",
+      "maskable": true
+    }
+  },
+  "content_categories": {
+    "health": {
+      "tier": "P2",
+      "maskable": false,
+      "terms": [
+        "diagnosis",
+        "diagnosed",
+        "symptom",
+        "symptoms",
+        "medication",
+        "medications",
+        "prescription",
+        "therapy",
+        "therapist",
+        "blood test",
+        "blood pressure",
+        "blood sugar",
+        "cholesterol",
+        "diabetes",
+        "diabetic",
+        "cancer",
+        "chemotherapy",
+        "pregnant",
+        "pregnancy",
+        "mental health",
+        "depression",
+        "anxiety",
+        "panic attack",
+        "hiv",
+        "allergy",
+        "allergic",
+        "surgery",
+        "insulin",
+        "dosage",
+        "medical",
+        "health plan",
+        "illness",
+        "disease",
+        "psychiatrist",
+        "rehab"
+      ]
+    },
+    "finance": {
+      "tier": "P2",
+      "maskable": false,
+      "terms": [
+        "salary",
+        "income",
+        "bank balance",
+        "account balance",
+        "debt",
+        "loan",
+        "mortgage",
+        "credit score",
+        "credit card bill",
+        "tax return",
+        "taxes owed",
+        "net worth",
+        "overdraft",
+        "bankruptcy",
+        "paycheck",
+        "savings account",
+        "investment portfolio",
+        "my investments"
+      ]
+    },
+    "legal": {
+      "tier": "P2",
+      "maskable": false,
+      "terms": [
+        "lawsuit",
+        "court date",
+        "court case",
+        "arrested",
+        "arrest",
+        "criminal record",
+        "police record",
+        "dui",
+        "custody",
+        "divorce",
+        "my lawyer",
+        "immigration status",
+        "visa status",
+        "probation",
+        "restraining order"
+      ]
+    }
+  },
+  "patterns": {
+    "credential": {
+      "tier": "P3",
+      "maskable": false,
+      "regex": "\\b(?:password|passcode|passphrase|pin|security code|one[- ]time code|otp)\\s*(?:is|was|:|=)\\s*(?!(?:too|wrong|incorrect|expired|long|short|weak|strong|not|located|missing|lost|forgotten|required|needed|reset|changed|the|a|an|my|your|invalid|correct|right|case|easy|hard|different|same|blocked|locked|saved|stored|updated|new|old)\\b)[^\\s.,;!?]+"
+    },
+    "payment_card": {
+      "tier": "P3",
+      "maskable": false,
+      "regex": "(?<!\\d)(?:\\d[ -]?){12,18}\\d(?!\\d)",
+      "checksum": "luhn"
+    },
+    "government_id": {
+      "tier": "P3",
+      "maskable": false,
+      "regex": "(?<!\\d)\\d{3}[ -]\\d{3}[ -]\\d{3}(?!\\d)",
+      "checksum": "luhn"
+    },
+    "bank_account": {
+      "tier": "P3",
+      "maskable": false,
+      "regex": "\\b(?:account|acct|transit|routing|institution)\\s*(?:number|no\\.?|#)?\\s*(?:is|:)?\\s*\\d{5,}"
+    },
+    "email": {
+      "tier": "P2",
+      "maskable": true,
+      "regex": "[\\w.+-]+@[\\w.-]+\\.[A-Za-z]{2,}"
+    },
+    "phone": {
+      "tier": "P2",
+      "maskable": true,
+      "regex": "(?<![\\w+])(?:\\+?1[ .-]?)?(?:\\(\\d{3}\\)\\s?|\\d{3}[ .-])\\d{3}[ .-]\\d{4}(?!\\w)|(?<![\\w+])\\+?1?\\d{10}(?!\\w)"
+    },
+    "address": {
+      "tier": "P2",
+      "maskable": true,
+      "regex": "(?-i:\\b\\d{1,6}\\s+(?:[A-Z][A-Za-z'.-]*\\s+){1,4}(?:Street|St|Road|Rd|Avenue|Ave|Drive|Dr|Boulevard|Blvd|Lane|Ln|Crescent|Cres|Court|Ct|Way|Parkway|Pkwy|Place|Pl)\\b\\.?)"
+    }
+  },
+  "decision": {
+    "simple": "Simple and uncertain requests always stay on the local model, whatever their tier.",
+    "complex": {
+      "P0": "privacy_layer",
+      "P1": "privacy_layer",
+      "P2_maskable": "privacy_layer",
+      "P2_content": "local_slm",
+      "P3": "local_slm"
+    }
+  },
+  "role_descriptors": {
+    "purpose": "What the larger model may be told about a placeholder: the role a saved entity plays, never its name, address or value. Roles in \"withhold\" reveal sensitive context and are described only generically.",
+    "person": {
+      "mom": "your mother",
+      "mum": "your mother",
+      "mother": "your mother",
+      "dad": "your father",
+      "father": "your father",
+      "parents": "your parents",
+      "wife": "your wife",
+      "husband": "your husband",
+      "partner": "your partner",
+      "spouse": "your spouse",
+      "boss": "your boss",
+      "manager": "your manager",
+      "colleague": "your colleague",
+      "coworker": "your colleague",
+      "brother": "your brother",
+      "sister": "your sister",
+      "son": "your son",
+      "daughter": "your daughter",
+      "kids": "your children",
+      "children": "your children",
+      "friend": "your friend",
+      "girlfriend": "your girlfriend",
+      "boyfriend": "your boyfriend",
+      "grandma": "your grandmother",
+      "grandmother": "your grandmother",
+      "grandpa": "your grandfather",
+      "grandfather": "your grandfather",
+      "aunt": "your aunt",
+      "uncle": "your uncle",
+      "cousin": "your cousin",
+      "neighbour": "your neighbour",
+      "neighbor": "your neighbour"
+    },
+    "location": {
+      "home": "your home",
+      "work": "your workplace",
+      "office": "your office",
+      "gym": "your gym",
+      "school": "your school",
+      "daycare": "your daycare",
+      "cottage": "your cottage",
+      "university": "your university",
+      "college": "your college"
+    },
+    "preference": {
+      "usual_playlist": "your usual music",
+      "usual_drink": "your usual drink"
+    },
+    "withhold": [
+      "doctor",
+      "dentist",
+      "therapist",
+      "psychiatrist",
+      "counsellor",
+      "counselor",
+      "lawyer",
+      "clinic",
+      "hospital",
+      "rehab",
+      "pharmacy",
+      "church",
+      "mosque",
+      "temple",
+      "synagogue",
+      "parole",
+      "probation",
+      "court"
+    ],
+    "generic": {
+      "person": "a person you know",
+      "location": "a saved place",
+      "preference": "a saved preference",
+      "email": "an email address",
+      "phone": "a phone number",
+      "address": "a street address",
+      "contact_detail": "a contact detail",
+      "personal_detail": "a personal detail",
+      "other": "a private detail"
+    }
+  }
+}

@@ -1,0 +1,29 @@
+# systemd *user* unit for the site. ./install.sh fills in the paths, writes it to
+# ~/.config/systemd/user/jlr-privacy-routing.service and starts it.
+#
+# It is started, NOT enabled: the site does not start by itself after a reboot.
+#   start:  ./install.sh --start     (or: systemctl --user start jlr-privacy-routing)
+#   stop:   ./install.sh --stop
+#   logs:   journalctl --user -u jlr-privacy-routing -n 50
+#
+# Settings (port 8770, the driver screen as home page, HTTPS for network access, models)
+# come from .env and models.toml in the repo, written by ./install.sh. They are not set
+# here on purpose: Environment= lines would override .env.
+
+[Unit]
+Description=JLR privacy routing (driver site)
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/path/to/jlr-privacy-routing
+ExecStart=/path/to/jlr-privacy-routing/.venv/bin/python /path/to/jlr-privacy-routing/server/app.py
+Environment=PYTHONUNBUFFERED=1
+Restart=on-failure
+RestartSec=5
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

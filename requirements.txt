@@ -1,0 +1,7 @@
+# Server and package: Python 3.11+ standard library plus encryption for driver profiles.
+cryptography>=41      # AES-256-GCM
+argon2-cffi>=21.3     # Argon2id password key (portable wheels; independent of the system OpenSSL)
+# External: a model server with the models you choose.
+# Optional voice input (driver screen mic button), transcribed on this server:
+#   pip install faster-whisper   then put the Whisper base.en model in models/whisper/base.en
+#   (python -c "from faster_whisper import download_model; download_model('base.en', output_dir='models/whisper/base.en')")
