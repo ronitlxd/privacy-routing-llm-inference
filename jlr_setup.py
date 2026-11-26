@@ -202,7 +202,10 @@ def settings_lines(settings):
     lines.append(f"{OK if ENV_FILE.is_file() else WARN} settings file .env" + ('' if ENV_FILE.is_file() else ' (not written yet; defaults apply)'))
     profiles = ROOT / settings['JLR_PROFILES_DIR'] / 'index.json'
     count = len(json.loads(profiles.read_text(encoding='utf-8'))) if profiles.is_file() else 0
-    lines.append(f"{OK if count else WARN} driver profiles: {count} (Guest is always available)")
+    from jlr.demo_profile import NAME, enabled
+    demo = enabled(settings) and enabled()
+    note = f'demo driver {NAME} is created when the site starts' if demo and not count else 'Guest is always available'
+    lines.append(f"{OK if count or demo else WARN} driver profiles: {count} ({note})")
     return lines
 
 

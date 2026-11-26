@@ -49,6 +49,20 @@ Then open <http://localhost:8770/>.
 
 If you chose network access, open `https://<server-address>:8443/`. The browser shows a warning the first time because the certificate is self-signed. If a firewall is on, allow the port with `sudo ufw allow 8443/tcp`. Use this on a trusted internal network only, never on the public internet.
 
+## Demo driver
+
+The site opens signed in as the demo driver **Alex** (password `1234`), with sample data ready for testing:
+
+| Type | Saved data |
+|---|---|
+| Places | home (350 City Hall Square W, Windsor), work (401 Sunset Ave, Windsor), gym (8787 McHugh St, Windsor) |
+| Contacts | my wife (Taylor Morgan), alex (Alex Chen), my brother (Sam Chen), mom (Jordan Lee) |
+| Preferences | usual music: Jazz, usual drink: Oat latte |
+
+Try "Navigate home", "Call my wife" or "Starting from home, is it faster to go to the gym before work or after work?".
+
+The demo password is public, so never save real private data in Alex. Create your own driver from the menu at the top right. To turn the demo driver off, set `JLR_DEMO_PROFILE=0` in `.env`, then run `./install.sh --stop` and `./install.sh --start`.
+
 ## Everyday commands
 
 | Command | What it does |

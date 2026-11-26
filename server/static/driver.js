@@ -459,6 +459,8 @@ async function start() {
   const tick = () => { $('#clock').textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}); };
   tick(); setInterval(tick, 15000);
   let profile = null;
+  // A new session may start as the demo driver, so open it now and show who is signed in.
+  if (!session) await ensureSession().catch(() => {});
   if (session) {
     const response = await fetch('/api/v2/session', {headers: {'X-JLR-Session': session}});
     if (response.ok) profile = (await response.json()).profile;

@@ -311,7 +311,7 @@ class Handler(BaseHTTPRequestHandler):
         if registry is None: return self.reply(404, {"error": "Profiles are not enabled on this server."})
         try:
             if self.path in {"/api/v2/profile/login", "/api/v2/profiles/create", "/api/v2/profile/guest"}:
-                if self.path == "/api/v2/profile/guest": store = c.sessions.store
+                if self.path == "/api/v2/profile/guest": store = c.sessions.guest
                 elif self.path == "/api/v2/profiles/create": store = registry.create(payload.get("name"), payload.get("password"))
                 else:
                     if not isinstance(payload.get("profile_id"), str): raise ProfileError("Choose a profile.")
@@ -464,6 +464,10 @@ if __name__ == "__main__":
     for name, role in checked.roles.items():
         where, _ = role.endpoint.where()
         print(f"  {name:<6} {role.model} via {role.endpoint.provider} at {where} ({role.endpoint.trust})")
+    # Open (or create) the demo driver now, so the first page load already starts as that driver.
+    from jlr.coordinator import get_coordinator
+    default_profile = getattr(get_coordinator().sessions.store, "profile", None)
+    if default_profile and default_profile.get("protected"): print(f"  new sessions start as {default_profile['name']} (demo driver)")
     if os.environ.get("JLR_WARMUP", "1") != "0":
         threading.Thread(target=warm_up_models, name="model-warm-up", daemon=True).start()
     if context:

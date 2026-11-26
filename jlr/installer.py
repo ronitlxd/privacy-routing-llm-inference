@@ -805,7 +805,11 @@ class Installer:
         if mode == 'cloud': rows.append(('Large model', f"{self.larger['label']} (cloud, masked text)", self.larger['model']))
         elif mode == 'same': rows.append(('Large model', self.place(self.small['provider'], self.small['url'], self.small['kind']), self.larger['model']))
         else: rows.append(('Large model', 'none (small model answers everything)', ''))
-        rows += [('Drivers', ', '.join(self.drivers) or 'none yet (Guest only)', ''),
+        from .demo_profile import DEFAULT_PASSWORD, NAME, enabled
+        drivers = list(self.drivers)
+        if enabled(self.env) and not any(d.casefold() == NAME.casefold() for d in drivers):
+            drivers.append(f'{NAME} (demo data, password {self.env.get("JLR_DEMO_PASSWORD") or DEFAULT_PASSWORD})')
+        rows += [('Drivers', ', '.join(drivers) or 'none yet (Guest only)', ''),
                  ('Site access', 'SSH tunnel only' if self.env['HOST'] == '127.0.0.1' else f"HTTPS on this network (port {self.env['PORT']})", ''),
                  ('Config', 'models.toml, .env', '')]
         for label, where, model in rows: self.write(f'   {label:<22} {where:<26} {model}'.rstrip())

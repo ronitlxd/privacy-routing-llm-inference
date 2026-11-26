@@ -49,12 +49,14 @@ class V2Session:
     profile:dict=field(default_factory=lambda:{'id':'default','name':'Sample data','protected':False})
 
 class V2Sessions:
-    '''Sessions start on the default store: the guest (no private data) when profiles are
-    configured, otherwise the single sample database.'''
+    '''Sessions start on the default store: with profiles configured, the demo driver when one is given
+    (jlr.demo_profile) or else the guest (no private data); without profiles, the single sample database.'''
     def __init__(self,store=None,profiles=None):
         self.profiles=profiles
-        if profiles is not None and store is None:store=guest_store()
+        self.guest=guest_store() if profiles is not None else None
+        if profiles is not None and store is None:store=self.guest
         self.store=store if isinstance(store,EntityStore) else EntityStore(getattr(store,'path',None) or os.environ.get('JLR_V2_DB'))
+        if self.guest is None:self.guest=self.store
         self.items={};self.lock=threading.RLock()
     def create(self):
         with self.lock:
@@ -712,5 +714,9 @@ def get_coordinator():
     with INIT_LOCK:
         if COORDINATOR is None:
             root=os.environ.get('JLR_PROFILES_DIR')
-            COORDINATOR=V2Coordinator(sessions=V2Sessions(profiles=ProfileRegistry(root)) if root else None)
+            sessions=None
+            if root:
+                from .demo_profile import open_demo
+                registry=ProfileRegistry(root);sessions=V2Sessions(store=open_demo(registry),profiles=registry)
+            COORDINATOR=V2Coordinator(sessions=sessions)
     return COORDINATOR

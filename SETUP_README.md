@@ -50,7 +50,8 @@ needed, it prints the exact command.
    never logged.
 7. **Writes `models.toml` and `.env`.** `models.toml` is checked against the privacy rules before it is saved.
 8. **Creates the first driver** (name, then a hidden password of 4 or more characters). Contacts and places
-   are added later on the site.
+   are added later on the site. Separately, the site creates the demo driver **Alex** (password `1234`, sample
+   data only) when it starts, and new sessions open signed in as Alex; `JLR_DEMO_PROFILE=0` in `.env` turns it off.
 9. **Asks how the site is opened:**
    1. only through an SSH tunnel (default, safest): the site listens on `127.0.0.1:8770`;
    2. from other computers on this network: HTTPS only, on port 8443, with a self-signed certificate made for

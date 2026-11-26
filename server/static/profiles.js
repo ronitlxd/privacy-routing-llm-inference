@@ -116,11 +116,11 @@ for (const [kind, id] of [['contact', '#add-contact'], ['place', '#add-place'], 
 
 (async () => {
   try {
+    // A new session may start as the demo driver, so open it now and show who is signed in.
+    await ensureV2Session();
+    const response = await fetch('/api/v2/session', {headers: {'X-JLR-Session': v2Session}});
+    if (response.ok) showProfile((await response.json()).profile);
     await loadProfiles();
-    if (sessionStorage.getItem('jlr-v2-session')) {
-      const response = await fetch('/api/v2/session', {headers: {'X-JLR-Session': sessionStorage.getItem('jlr-v2-session')}});
-      if (response.ok) showProfile((await response.json()).profile);
-    }
   } catch (error) { /* profiles are optional; the workspace still works as guest */ }
   showProfile();
 })();
